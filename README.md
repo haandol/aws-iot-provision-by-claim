@@ -27,11 +27,7 @@ $ ./scripts/create-verification-crt.sh $PROFILE
 
 ### Register RootCA using verification certification
 
-create IAM Role ref https://aws.amazon.com/ko/blogs/iot/setting-up-just-in-time-provisioning-with-aws-iot-core/
-
 ```bash
-$ ./scripts/create-jitp-template.sh arn:aws:iam::929831892372:role/JITPRole
-
 $ ./scripts/register-root-ca.sh $PROFILE
 ```
 

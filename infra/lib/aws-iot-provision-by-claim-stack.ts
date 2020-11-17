@@ -9,7 +9,6 @@ export class AwsIotProvisionByClaimStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-
     const devicePolicyDocument = {
       'Version': '2012-10-17',
       'Statement': [
