@@ -35,7 +35,7 @@ $ ./scripts/register-root-ca.sh $PROFILE
 
 ## Deploy infrastructure
 
-1. open [**lib/config/service.ts**](lib/config/service.ts) fill the information
+1. open [**infra/lib/config/service.ts**](infra/lib/config/service.ts) fill the information
 
 2. deploy cdk
 
