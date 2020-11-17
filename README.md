@@ -40,6 +40,8 @@ $ ./scripts/register-root-ca.sh $PROFILE
 2. deploy cdk
 
 ```bash
+$ cd infra
+$ npm i
 $ cdk bootstrap
 $ cdk deploy "*" --require-apporval never
 ```
