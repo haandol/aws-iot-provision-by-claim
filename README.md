@@ -1,5 +1,6 @@
 # AWS IoT Provisioing by Claim
 
+<img src="https://d2908q01vomqb2.cloudfront.net/f6e1126cedebf23e1463aee73f9df08783640400/2020/04/30/fleet-provisioning-1.jpg"/>
 # Prerequisites
 
 - awscli
