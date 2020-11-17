@@ -1,14 +1,63 @@
-# Welcome to your CDK TypeScript project!
+# AWS IoT Provisioing by Claim
 
-This is a blank project for TypeScript development with CDK.
+# Prerequisites
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+- awscli
+- node.js 10.x+
+- AWS Account and locally configured AWS credential
 
-## Useful commands
 
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template
+# Installation
+
+1. Register RooCA
+2. Deploy Infra
+3. Connect device
+## Create RootCA
+
+```bash
+$ export PROFILE=default
+$ ./scripts/create-rootca.sh
+```
+
+### Create private key verification certificate
+
+```bash
+$ ./scripts/create-verification-crt.sh $PROFILE
+```
+
+### Register RootCA using verification certification
+
+create IAM Role ref https://aws.amazon.com/ko/blogs/iot/setting-up-just-in-time-provisioning-with-aws-iot-core/
+
+```bash
+$ ./scripts/create-jitp-template.sh arn:aws:iam::929831892372:role/JITPRole
+
+$ ./scripts/register-root-ca.sh $PROFILE
+```
+
+## Deploy infrastructure
+
+```bash
+$ cdk deploy "*"
+```
+
+## Connect device
+
+install dependencies
+
+```bash
+$ cd src
+$ npm i
+```
+
+run app.js
+
+```bash
+$ export DATA_ENDPOINT=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS | jq -r '.endpointAddress')
+$ node app.js -e $DATA_ENDPOINT -c clientID1 -n thing01
+```
+
+# References
+
+https://aws.amazon.com/ko/blogs/iot/how-to-automate-onboarding-of-iot-devices-to-aws-iot-core-at-scale-with-fleet-provisioning/
+https://github.com/aws-samples/aws-iot-fleet-provisioning

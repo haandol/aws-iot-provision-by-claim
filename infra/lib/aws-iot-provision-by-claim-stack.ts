@@ -167,7 +167,7 @@ export class AwsIotProvisionByClaimStack extends cdk.Stack {
       policyName: 'provisioningPolicy', 
     });
 
-    const caCertificatePem = fs.readFileSync(path.resolve(__dirname, 'rootCA.pem'));
+    const caCertificatePem = fs.readFileSync(path.resolve(__dirname, '..', '..', 'certs', 'rootCA.pem'));
     const certificate = new iot.CfnCertificate(this, 'ProvisioningCertificate', {
       status: 'ACTIVE',
       caCertificatePem: caCertificatePem.toString(),
