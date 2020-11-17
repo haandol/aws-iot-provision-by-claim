@@ -4,15 +4,11 @@ import * as cdk from '@aws-cdk/core';
 import * as iot from '@aws-cdk/aws-iot';
 import * as iam from '@aws-cdk/aws-iam';
 import * as lambda from '@aws-cdk/aws-lambda';
-import { ServicePrincipal } from '@aws-cdk/aws-iam';
+import { Account, Region, DevicePrefix, TemplateName } from './config/service';
 export class AwsIotProvisionByClaimStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const region = 'ap-northeast-2';
-    const account = '929831892372';
-    const templateName = 'demo';
-    const prefix = 'acaas_';
 
     const devicePolicyDocument = {
       'Version': '2012-10-17',
@@ -96,7 +92,7 @@ export class AwsIotProvisionByClaimStack extends cdk.Stack {
               'Fn::Join': [
                 '',
                 [
-                  prefix,
+                  DevicePrefix,
                   {
                     'Ref': 'SerialNumber'
                   }
@@ -119,12 +115,12 @@ export class AwsIotProvisionByClaimStack extends cdk.Stack {
       code: lambda.Code.fromAsset(path.resolve(__dirname, 'functions')),
       handler: 'hook.handler',
     });
-    preHookFunction.grantInvoke(new ServicePrincipal('iot.amazonaws.com'));
+    preHookFunction.grantInvoke(new iam.ServicePrincipal('iot.amazonaws.com'));
     new iot.CfnProvisioningTemplate(this, `ProvisioningTemplate`, {
       provisioningRoleArn: provisioningRole.roleArn,
       templateBody,
       enabled: true,
-      templateName,
+      templateName: TemplateName,
       preProvisioningHook: {
         payloadVersion: '2020-04-01',
         targetArn: preHookFunction.functionArn,
@@ -148,16 +144,16 @@ export class AwsIotProvisionByClaimStack extends cdk.Stack {
             'iot:Receive'
           ],
           'Resource': [
-            `arn:aws:iot:${region}:${account}:topic/$aws/certificates/create/*`,
-            `arn:aws:iot:${region}:${account}:topic/$aws/provisioning-templates/${templateName}/provision/*`,
+            `arn:aws:iot:${Region}:${Account}:topic/$aws/certificates/create/*`,
+            `arn:aws:iot:${Region}:${Account}:topic/$aws/provisioning-templates/${TemplateName}/provision/*`,
           ]
         },
         {
           'Effect': 'Allow',
           'Action': 'iot:Subscribe',
           'Resource': [
-            `arn:aws:iot:${region}:${account}:topicfilter/$aws/certificates/create/*`,
-            `arn:aws:iot:${region}:${account}:topicfilter/$aws/provisioning-templates/${templateName}/provision/*`,
+            `arn:aws:iot:${Region}:${Account}:topicfilter/$aws/certificates/create/*`,
+            `arn:aws:iot:${Region}:${Account}:topicfilter/$aws/provisioning-templates/${TemplateName}/provision/*`,
           ]
         }
       ]

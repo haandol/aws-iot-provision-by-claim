@@ -37,20 +37,25 @@ $ ./scripts/register-root-ca.sh $PROFILE
 
 ## Deploy infrastructure
 
+1. open [**lib/config/service.ts**](lib/config/service.ts) fill the information
+
+2. deploy cdk
+
 ```bash
-$ cdk deploy "*"
+$ cdk bootstrap
+$ cdk deploy "*" --require-apporval never
 ```
 
 ## Connect device
 
-install dependencies
+1. install dependencies
 
 ```bash
 $ cd src
 $ npm i
 ```
 
-run app.js
+2. run app.js
 
 ```bash
 $ export DATA_ENDPOINT=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS | jq -r '.endpointAddress')
