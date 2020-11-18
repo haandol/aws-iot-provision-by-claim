@@ -73,6 +73,7 @@ class Device {
       console.log(`[OnMessage][${topic}]:`)
       if (topic === '$aws/certificates/create/json/accepted') {
         const payload = JSON.parse(message.toString());
+        console.log(payload);
 
         fs.writeFileSync(path.resolve(__dirname, '..', 'certs', 'device.pem'), payload.certificatePem);
         fs.writeFileSync(path.resolve(__dirname, '..', 'certs', 'device.key'), payload.privateKey);
