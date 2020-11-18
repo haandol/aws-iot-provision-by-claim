@@ -23,6 +23,12 @@ const argv = yargs
     description: 'client id',
     demandOption: true,
   })
+  .option('t', {
+    alias: 'templateName',
+    type: 'string',
+    description: 'template name',
+    demandOption: true,
+  })
   .argv;
 
 class Device {
@@ -64,6 +70,7 @@ class Device {
     })
 
     this.device.on('message', (topic, message) => {
+      console.log(`[OnMessage][${topic}]:`)
       if (topic === '$aws/certificates/create/json/accepted') {
         const payload = JSON.parse(message.toString());
 
@@ -78,8 +85,7 @@ class Device {
           },
         }
 
-        // TODO: template name (demo) should be provided by user
-        this.publish('$aws/provisioning-templates/demo/provision/json', JSON.stringify(register_template));
+        this.publish(`$aws/provisioning-templates/${props.templateName}/provision/json`, JSON.stringify(register_template));
       } else {
         console.log(`[Device] message: ${topic}-${message.toString()}`);
       }
