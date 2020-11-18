@@ -51,6 +51,8 @@ class Device {
       console.log('[Device]connect');
 
       if (!this.initialized) {
+        this.subscribe('$aws/certificates/create/json/accepted');
+        this.subscribe('$aws/certificates/create/json/rejected');
         this.publish(`$aws/certificates/create/json`, '');
       } else {
         this.subscribe(`iot/thing/${props.thingName}`);
