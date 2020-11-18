@@ -1,4 +1,4 @@
-export const Namespace = 'DemoAlpha';
+export const Namespace = 'DemoBeta';
 export const Account = '929831892372'
 export const Region = 'ap-northeast-2';
 
