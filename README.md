@@ -59,7 +59,7 @@ $ npm i
 
 ```bash
 $ export DATA_ENDPOINT=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS | jq -r '.endpointAddress')
-$ node app.js -e $DATA_ENDPOINT -c clientID1 -n thing01
+$ node app.js -e $DATA_ENDPOINT -c clientID1 -n thing01 -t demo
 ```
 
 # References
