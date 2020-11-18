@@ -2,7 +2,7 @@ import json
 from datetime import date
 
 provision_response = {
-    'allowProvisioning': False,
+    'allowProvisioning': True,
     'parameterOverrides': {'CertDate': date.today().strftime('%m/%d/%y')}
 }
 
