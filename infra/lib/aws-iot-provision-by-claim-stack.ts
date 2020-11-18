@@ -169,9 +169,11 @@ export class AwsIotProvisionByClaimStack extends cdk.Stack {
       certificatePem: caCertificatePem.toString(),
       certificateMode: 'DEFAULT',
     });
-    new iot.CfnPolicyPrincipalAttachment(this, 'PolicyPrincipalAttachment', {
+    certificate.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
+    new iot.CfnPolicyPrincipalAttachment(this, 'ProvisioningPolicyAttachment', {
       policyName: provisioningPolicy.policyName!,
       principal: certificate.attrArn,
     });
   }
+
 }
