@@ -43,7 +43,7 @@ $ ./scripts/register-root-ca.sh $PROFILE
 $ cd infra
 $ npm i
 $ cdk bootstrap
-$ cdk deploy "*" --require-apporval never
+$ cdk deploy "*" --require-approval never
 ```
 
 ## Connect device

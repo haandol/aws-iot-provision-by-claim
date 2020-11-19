@@ -112,7 +112,7 @@ export class ProvisioningStack extends cdk.Stack {
     });
     const preHookFunction = new lambda.Function(this, 'PreHookFunction', {
       runtime: lambda.Runtime.PYTHON_3_7,
-      code: lambda.Code.fromAsset(path.resolve(__dirname, 'functions')),
+      code: lambda.Code.fromAsset(path.resolve(__dirname, 'functions', 'provisioning')),
       handler: 'hook.handler',
     });
     preHookFunction.grantInvoke(new iam.ServicePrincipal('iot.amazonaws.com'));
@@ -162,6 +162,7 @@ export class ProvisioningStack extends cdk.Stack {
       policyDocument: provisionPolicyDocument,
       policyName: 'provisioningPolicy', 
     });
+    provisioningPolicy.applyRemovalPolicy(cdk.RemovalPolicy.DESTROY);
 
     const caCertificatePem = fs.readFileSync(path.resolve(__dirname, '..', '..', 'certs', 'rootCA.pem'));
     const certificate = new iot.CfnCertificate(this, 'ProvisioningCertificate', {

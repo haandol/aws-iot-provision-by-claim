@@ -61,7 +61,10 @@ class Device {
         this.subscribe('$aws/certificates/create/json/rejected');
         this.publish(`$aws/certificates/create/json`, '');
       } else {
-        this.subscribe(`iot/thing/${props.thingName}`);
+        this.subscribe(`iot/thing/${props.thingName}/checkin/accepted`);
+        this.subscribe(`iot/thing/${props.thingName}/checkin/rejected`);
+
+        this.publish(`iot/thing/${props.thingName}/checkin`, JSON.stringify({id: 51, thingName: props.thingName}));
       }
     });
 
@@ -85,17 +88,17 @@ class Device {
             'ModelType': 'Demo',
           },
         }
-
         this.publish(`$aws/provisioning-templates/${props.templateName}/provision/json`, JSON.stringify(register_template));
+        setTimeout(() => process.exit(), 3000);
       } else {
         console.log(`[Device] message: ${topic}-${message.toString()}`);
       }
     });
   }
 
-  publish(topic, msg) {
-    console.info(`[Device] publish msg to [${topic}]: ${msg}`);
-    this.device.publish(topic, msg);
+  publish(topic, data) {
+    console.info(`[Device] publish msg to [${topic}]: ${data}`);
+    this.device.publish(topic, data);
   }
 
   subscribe(topic) {
@@ -104,5 +107,4 @@ class Device {
   }
 }
 
-
-const device = new Device(argv);
+new Device(argv);
