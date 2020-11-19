@@ -16,17 +16,17 @@ def handler(event, context):
     thing_name = event['thingName']
 
     resp = requests.post(f'{URL}/cards/checkin', data=json.dumps(event).encode('utf-8'), headers={'authorization': 'allow'})
-    logger.info(f'{resp.status_code}, {resp.content}')
+    logger.info(f'{resp.status_code}, {resp.text}')
 
     if 200 == resp.status_code:
         client.publish(
             topic=f'iot/thing/{thing_name}/checkin/accepted',
             qos=1,
-            payload=json.dumps({'success': True, 'msg': resp.content}).encode('utf-8')
+            payload=json.dumps({'success': True, 'msg': resp.text}).encode('utf-8')
         )
     else:
         client.publish(
             topic=f'iot/thing/{thing_name}/checkin/rejected',
             qos=1,
-            payload=json.dumps({'success': False, 'msg': resp.content}).encode('utf-8')
+            payload=json.dumps({'success': False, 'msg': resp.text}).encode('utf-8')
         )
