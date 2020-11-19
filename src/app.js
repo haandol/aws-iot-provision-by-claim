@@ -64,7 +64,7 @@ class Device {
         this.subscribe(`iot/thing/${props.thingName}/checkin/accepted`);
         this.subscribe(`iot/thing/${props.thingName}/checkin/rejected`);
 
-        this.publish(`iot/thing/${props.thingName}/checkin`, JSON.stringify({id: 51, thingName: props.thingName}));
+        this.publish(`iot/thing/${props.thingName}/checkin`, JSON.stringify({id: 74, thingName: props.thingName}));
       }
     });
 

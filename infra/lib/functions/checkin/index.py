@@ -22,11 +22,11 @@ def handler(event, context):
         client.publish(
             topic=f'iot/thing/{thing_name}/checkin/accepted',
             qos=1,
-            payload=json.dumps({'success': True}).encode('utf-8')
+            payload=json.dumps({'success': True, 'msg': resp.content}).encode('utf-8')
         )
     else:
         client.publish(
             topic=f'iot/thing/{thing_name}/checkin/rejected',
             qos=1,
-            payload=json.dumps({'success': False}).encode('utf-8')
+            payload=json.dumps({'success': False, 'msg': resp.content}).encode('utf-8')
         )
