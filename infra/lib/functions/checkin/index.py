@@ -3,6 +3,7 @@ import json
 import boto3
 import logging
 import requests
+from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('checkin')
 
@@ -18,15 +19,16 @@ def handler(event, context):
     resp = requests.post(f'{URL}/cards/checkin', data=json.dumps(event).encode('utf-8'), headers={'authorization': 'allow'})
     logger.info(f'{resp.status_code}, {resp.text}')
 
+    now = int(datetime.now().timestamp()*1000)
     if 200 == resp.status_code:
         client.publish(
             topic=f'iot/thing/{thing_name}/checkin/accepted',
             qos=1,
-            payload=json.dumps({'success': True, 'msg': resp.text}).encode('utf-8')
+            payload=json.dumps({'success': True, 'msg': resp.text, 'created': now}).encode('utf-8')
         )
     else:
         client.publish(
             topic=f'iot/thing/{thing_name}/checkin/rejected',
             qos=1,
-            payload=json.dumps({'success': False, 'msg': resp.text}).encode('utf-8')
+            payload=json.dumps({'success': False, 'msg': resp.text, 'created': now}).encode('utf-8')
         )
