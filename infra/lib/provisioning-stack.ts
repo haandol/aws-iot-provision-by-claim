@@ -5,7 +5,8 @@ import * as iot from '@aws-cdk/aws-iot';
 import * as iam from '@aws-cdk/aws-iam';
 import * as lambda from '@aws-cdk/aws-lambda';
 import { Account, Region, DevicePrefix, TemplateName } from './config/service';
-export class AwsIotProvisionByClaimStack extends cdk.Stack {
+
+export class ProvisioningStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
