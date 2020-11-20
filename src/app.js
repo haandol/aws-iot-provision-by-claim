@@ -2,15 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const yargs = require('yargs');
 const awsIot = require('aws-iot-device-sdk');
+const { RfidReader } = require('./rfid');
 
 const argv = yargs
   .usage('Usage: $0 [options]')
-  .option('e', {
-    alias: 'endpoint',
-    type: 'string',
-    description: 'device endpoint',
-    demandOption: true,
-  })
   .option('n', {
     alias: 'thingName',
     type: 'string',
@@ -50,7 +45,7 @@ class Device {
       certPath,
       caPath: path.resolve(__dirname, '..', 'certs', 'AmazonRootCA1.pem'),
       clientId: props.clientId,
-      host: props.endpoint,
+      host: 'a3dncbrynpid8w-ats.iot.ap-northeast-2.amazonaws.com',
     });
  
     this.device.on('connect', (msg) => {
@@ -64,7 +59,10 @@ class Device {
         this.subscribe(`iot/thing/${props.thingName}/checkin/accepted`);
         this.subscribe(`iot/thing/${props.thingName}/checkin/rejected`);
 
-        this.publish(`iot/thing/${props.thingName}/checkin`, JSON.stringify({id: 74, thingName: props.thingName}));
+        const reader = new RfidReader();
+        reader.read((uid) => {
+          this.publish(`iot/thing/${props.thingName}/checkin`, JSON.stringify({id: uid, thingName: props.thingName}));
+        });
       }
     });
 
