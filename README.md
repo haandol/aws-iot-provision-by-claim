@@ -37,7 +37,14 @@ $ ./scripts/register-root-ca.sh $PROFILE
 
 1. open [**infra/lib/config/service.ts**](infra/lib/config/service.ts) fill the information
 
-2. deploy cdk
+2. deploy infrastructure
+
+install cdk
+```bash
+$ npm i -g cdk@1.74.0
+```
+
+deploy cdk
 
 ```bash
 $ cd infra
@@ -51,6 +58,10 @@ $ cdk deploy "*" --require-apporval never
 1. install dependencies
 
 ```bash
+$ npm i -g forever
+```
+
+```bash
 $ cd src
 $ npm i
 ```
@@ -58,8 +69,14 @@ $ npm i
 2. run app.js
 
 ```bash
-$ export DATA_ENDPOINT=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS | jq -r '.endpointAddress')
-$ node app.js -e $DATA_ENDPOINT -c clientID1 -n thing01 -t demo
+$ export THING_NAME=thing1
+$ export DATA_ENDPOINT=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS --profile $PROFILE | jq -r '.endpointAddress')
+$ forever run app.js -e $DATA_ENDPOINT -n $THING_NAME -c clientID1 -t demo
+```
+
+3. test publish message
+```bash
+$ aws iot-data publish --profile $PROFILE --topic iot/thing/$THING_NAME --payload hi
 ```
 
 # References
