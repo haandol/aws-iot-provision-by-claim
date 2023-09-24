@@ -1,0 +1,10 @@
+[app]
+ns="IoTCoreDemo"
+stage="Dev"
+
+[aws]
+region="ap-northeast-2"
+
+[iot]
+templateName="demo"
+devicePrefix="demo_"

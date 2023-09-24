@@ -5,15 +5,15 @@
 # Prerequisites
 
 - awscli
-- node.js 10.x+
+- node.js 16+
 - AWS Account and locally configured AWS credential
-
 
 # Installation
 
 1. Register RooCA
 2. Deploy Infra
 3. Connect device
+
 ## Create RootCA
 
 ```bash
@@ -35,19 +35,26 @@ $ ./scripts/register-root-ca.sh $PROFILE
 
 ## Deploy infrastructure
 
-1. open [**infra/lib/config/service.ts**](infra/lib/config/service.ts) fill the information
+1. open [**/infra/lib/config.ts**](infra/config/dev.toml) and replace values for your environment
 
-2. deploy infrastructure
+2. copy `dev.toml` file under infra folder with name `.toml`
+
+```bash
+$ cd infra
+$ cp config/dev.toml .toml
+```
+
+3. deploy infrastructure
 
 install cdk
+
 ```bash
-$ npm i -g cdk@1.74.0
+$ npm i -g aws-cdk@2.97.0
 ```
 
 deploy cdk
 
 ```bash
-$ cd infra
 $ npm i
 $ cdk bootstrap
 $ cdk deploy "*" --require-apporval never
@@ -75,6 +82,7 @@ $ forever run app.js -e $DATA_ENDPOINT -n $THING_NAME -c clientID1 -t demo
 ```
 
 3. test publish message
+
 ```bash
 $ aws iot-data publish --profile $PROFILE --topic iot/thing/$THING_NAME --payload hi
 ```
