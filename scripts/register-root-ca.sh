@@ -14,6 +14,7 @@ fi
 pushd .
 cd certs
 
+pwd
 aws iot register-ca-certificate --ca-certificate file://rootCA.pem --verification-cert file://verification.pem --set-as-active --allow-auto-registration --profile $PROFILE
 
 popd

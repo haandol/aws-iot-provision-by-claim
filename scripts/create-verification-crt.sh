@@ -16,7 +16,7 @@ cd certs
 
 openssl genrsa -out verification.key 2048
 
-REG_CODE=$(aws iot get-registration-code --profile $PROFILE | jq -r '.registrationCode')
+REG_CODE=$(aws iot get-registration-code --profile $PROFILE --query registrationCode --output text)
 SUBJ="/C=KR/CN=$REG_CODE"
 openssl req -new -key verification.key -out verification.csr -subj $SUBJ
 

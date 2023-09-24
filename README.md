@@ -77,7 +77,7 @@ $ npm i
 
 ```bash
 $ export THING_NAME=thing1
-$ export DATA_ENDPOINT=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS --profile $PROFILE | jq -r '.endpointAddress')
+$ export DATA_ENDPOINT=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS --profile $PROFILE --query endpointAddress --output text)
 $ forever run app.js -e $DATA_ENDPOINT -n $THING_NAME -c clientID1 -t demo
 ```
 
@@ -91,3 +91,16 @@ $ aws iot-data publish --profile $PROFILE --topic iot/thing/$THING_NAME --payloa
 
 https://aws.amazon.com/ko/blogs/iot/how-to-automate-onboarding-of-iot-devices-to-aws-iot-core-at-scale-with-fleet-provisioning/
 https://github.com/aws-samples/aws-iot-fleet-provisioning
+
+# TroubleShooting
+
+## Error Loading extension section v3_ca on MacOS
+
+if error, `Error Loading extension section v3_ca`, occurs when execute `create-rootca.sh`, open `/etc/ssl/openssl.cnf` and append below code.
+
+```ini
+[ v3_ca ]
+basicConstraints = critical,CA:TRUE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+```
