@@ -65,7 +65,7 @@ $ cdk deploy "*" --require-apporval never
 1. install dependencies
 
 ```bash
-$ npm i -g forever
+$ npm i -g ts-node
 ```
 
 ```bash
@@ -76,15 +76,15 @@ $ npm i
 2. run app.js
 
 ```bash
-$ export THING_NAME=thing1
-$ export DATA_ENDPOINT=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS --profile $PROFILE --query endpointAddress --output text)
-$ forever run app.js -e $DATA_ENDPOINT -n $THING_NAME -c clientID1 -t demo
+$ export THING_NAME=thing01
+$ export DATA_ENDPOINT=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS --query endpointAddress --output text)
+$ ts-node app.ts -e $DATA_ENDPOINT -n $THING_NAME -c clientID1 -t demo
 ```
 
 3. test publish message
 
 ```bash
-$ aws iot-data publish --profile $PROFILE --topic iot/thing/$THING_NAME --payload hi
+$ aws iot-data publish --topic iot/thing/$THING_NAME --payload hi
 ```
 
 # References
