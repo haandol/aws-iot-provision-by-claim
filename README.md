@@ -1,6 +1,8 @@
 # AWS IoT Provisioing by Claim
 
-<img src="https://d2908q01vomqb2.cloudfront.net/f6e1126cedebf23e1463aee73f9df08783640400/2020/04/30/fleet-provisioning-1.jpg"/>
+Image from [AWS Whitepaper](https://docs.aws.amazon.com/whitepapers/latest/device-manufacturing-provisioning/provisioning-identity-in-aws-iot-core-for-device-connections.html)
+
+<img src="https://docs.aws.amazon.com/images/whitepapers/latest/device-manufacturing-provisioning/images/FleetProvisioningByClaim.png"/>
 
 # Prerequisites
 
