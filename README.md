@@ -78,7 +78,7 @@ $ npm i
 ```bash
 $ export THING_NAME=thing01
 $ export DATA_ENDPOINT=$(aws iot describe-endpoint --endpoint-type iot:Data-ATS --query endpointAddress --output text)
-$ ts-node app.ts -e $DATA_ENDPOINT -n $THING_NAME -c clientID1 -t demo
+$ ts-node app.ts -e $DATA_ENDPOINT -n $THING_NAME -a ../certs/AmazonRootCA1.pem -c clientID1 -t demo
 ```
 
 3. test publish message
