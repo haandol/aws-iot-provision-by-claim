@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import { mqtt, iot, mqtt5, auth, iotidentity } from 'aws-iot-device-sdk-v2';
 import { once } from 'events';
 const yargs = require('yargs');
@@ -44,16 +45,38 @@ const argv = yargs
     demandOption: true,
   }).argv;
 
-/*
- * Build an mqtt connection using websockets
- */
+async function buildMqtt5ClientFromCert(
+  endpoint: string,
+  caFilepath: string,
+  clientId: string,
+  certPath: string,
+  keyPath: string
+) {
+  const configBuilder =
+    iot.AwsIotMqtt5ClientConfigBuilder.newDirectMqttBuilderWithMtlsFromPath(
+      endpoint,
+      certPath,
+      keyPath
+    );
+  configBuilder.withCertificateAuthorityFromPath(undefined, caFilepath);
+  configBuilder.withConnectProperties({
+    keepAliveIntervalSeconds: 60,
+    clientId,
+  });
+  configBuilder.withSessionBehavior(
+    mqtt5.ClientSessionBehavior.RejoinPostSuccess
+  );
+
+  return new mqtt5.Mqtt5Client(configBuilder.build());
+}
+
 async function buildMqtt5Client(
   endpoint: string,
   caFilepath: string,
   clientId: string,
   region: string
 ) {
-  let configBuilder =
+  const configBuilder =
     iot.AwsIotMqtt5ClientConfigBuilder.newWebsocketMqttBuilderWithSigv4Auth(
       endpoint,
       {
@@ -90,7 +113,19 @@ async function executeKeys(
           console.log('Error occurred..');
           reject(error);
         } else {
-          resolve(response.certificateOwnershipToken);
+          const { certificatePem, privateKey, certificateOwnershipToken } =
+            response;
+          if (certificatePem && privateKey) {
+            fs.writeFileSync(
+              path.resolve(__dirname, '..', 'certs', 'device.pem'),
+              certificatePem
+            );
+            fs.writeFileSync(
+              path.resolve(__dirname, '..', 'certs', 'device.key'),
+              privateKey
+            );
+          }
+          resolve(certificateOwnershipToken);
         }
       };
 
@@ -120,19 +155,15 @@ async function executeKeys(
       );
       const keysSubRequest: iotidentity.model.CreateKeysAndCertificateSubscriptionRequest =
         {};
-      console.log(
-        await identity.subscribeToCreateKeysAndCertificateAccepted(
-          keysSubRequest,
-          mqtt.QoS.AtLeastOnce,
-          keysAccepted
-        )
+      await identity.subscribeToCreateKeysAndCertificateAccepted(
+        keysSubRequest,
+        mqtt.QoS.AtLeastOnce,
+        keysAccepted
       );
-      console.log(
-        await identity.subscribeToCreateKeysAndCertificateRejected(
-          keysSubRequest,
-          mqtt.QoS.AtLeastOnce,
-          keysRejected
-        )
+      await identity.subscribeToCreateKeysAndCertificateRejected(
+        keysSubRequest,
+        mqtt.QoS.AtLeastOnce,
+        keysRejected
       );
 
       console.log('Publishing to CreateKeysAndCertificate topic..');
@@ -141,11 +172,9 @@ async function executeKeys(
           return {};
         },
       };
-      console.log(
-        await identity.publishCreateKeysAndCertificate(
-          keysRequest,
-          mqtt.QoS.AtLeastOnce
-        )
+      await identity.publishCreateKeysAndCertificate(
+        keysRequest,
+        mqtt.QoS.AtLeastOnce
       );
     } catch (err) {
       reject(err);
@@ -227,13 +256,27 @@ async function executeRegisterThing(
 async function main(argv: Args) {
   console.log(`Connecting... ${JSON.stringify(argv)}`);
 
-  const client5 = await buildMqtt5Client(
-    argv.endpoint,
-    argv.caFilepath,
-    argv.clientId,
-    argv.region
-  );
-  const identity = iotidentity.IotIdentityClient.newFromMqtt5Client(client5);
+  const certPath = path.resolve(__dirname, '..', 'certs', 'device.pem');
+  const keyPath = path.resolve(__dirname, '..', 'certs', 'device.key');
+  const isRegistered = fs.existsSync(certPath) && fs.existsSync(keyPath);
+
+  let client5: mqtt5.Mqtt5Client;
+  if (isRegistered) {
+    client5 = await buildMqtt5ClientFromCert(
+      argv.endpoint,
+      argv.caFilepath,
+      argv.clientId,
+      certPath,
+      keyPath
+    );
+  } else {
+    client5 = await buildMqtt5Client(
+      argv.endpoint,
+      argv.caFilepath,
+      argv.clientId,
+      argv.region
+    );
+  }
 
   const connectionSuccess = once(client5, 'connectionSuccess');
   client5.start();
@@ -243,14 +286,25 @@ async function main(argv: Args) {
   await connectionSuccess;
   console.log('Connected with Mqtt5 Client!');
 
-  let token = await executeKeys(identity);
-  console.log(`token: ${token}`);
-  await executeRegisterThing(
-    identity,
-    token as string,
-    argv.templateName,
-    argv.thingName
-  );
+  if (!isRegistered) {
+    const identity = iotidentity.IotIdentityClient.newFromMqtt5Client(client5);
+    const token = await executeKeys(identity);
+    console.log(`token: ${token}`);
+    await executeRegisterThing(
+      identity,
+      token as string,
+      argv.templateName,
+      argv.thingName
+    );
+  }
+
+  let result = await client5.publish({
+    qos: mqtt5.QoS.AtLeastOnce,
+    topicName: 'hello/world',
+    payload: JSON.stringify('hello world'),
+    userProperties: [{ name: 'publishedAt', value: `${new Date()}` }],
+  });
+  console.log('Publish result: ' + JSON.stringify(result));
 
   console.log('Disconnecting...');
   let stopped = once(client5, 'stopped');
@@ -261,6 +315,8 @@ async function main(argv: Args) {
 
   // Allow node to die if the promise above resolved
   clearTimeout(timer);
+
+  process.exit(0);
 }
 
 main(argv).catch((e) => console.error(e));
