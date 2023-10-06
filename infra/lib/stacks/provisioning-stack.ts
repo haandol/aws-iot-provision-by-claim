@@ -39,11 +39,6 @@ export class ProvisioningStack extends cdk.Stack {
           ],
           Resource: ['*'],
         },
-        {
-          Effect: 'Allow',
-          Action: ['greengrass:*'],
-          Resource: ['*'],
-        },
       ],
     };
     const templateBody = JSON.stringify({
@@ -59,27 +54,8 @@ export class ProvisioningStack extends cdk.Stack {
         },
       },
       Resources: {
-        certificate: {
-          Properties: {
-            CertificateId: {
-              Ref: 'AWS::IoT::Certificate::Id',
-            },
-            Status: 'Active',
-          },
-          Type: 'AWS::IoT::Certificate',
-        },
-        policy: {
-          Properties: {
-            PolicyDocument: JSON.stringify(devicePolicyDocument),
-          },
-          Type: 'AWS::IoT::Policy',
-        },
         thing: {
-          OverrideSettings: {
-            AttributePayload: 'MERGE',
-            ThingGroups: 'DO_NOTHING',
-            ThingTypeName: 'REPLACE',
-          },
+          Type: 'AWS::IoT::Thing',
           Properties: {
             AttributePayload: {
               model_type: {
@@ -99,7 +75,26 @@ export class ProvisioningStack extends cdk.Stack {
               ],
             },
           },
-          Type: 'AWS::IoT::Thing',
+          OverrideSettings: {
+            AttributePayload: 'MERGE',
+            ThingTypeName: 'REPLACE',
+            ThingGroups: 'DO_NOTHING',
+          },
+        },
+        certificate: {
+          Type: 'AWS::IoT::Certificate',
+          Properties: {
+            CertificateId: {
+              Ref: 'AWS::IoT::Certificate::Id',
+            },
+            Status: 'ACTIVE',
+          },
+        },
+        policy: {
+          Type: 'AWS::IoT::Policy',
+          Properties: {
+            PolicyDocument: JSON.stringify(devicePolicyDocument),
+          },
         },
       },
     });
