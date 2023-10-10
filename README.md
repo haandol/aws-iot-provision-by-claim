@@ -37,7 +37,7 @@ $ ./scripts/register-root-ca.sh $PROFILE
 
 ## Deploy infrastructure
 
-1. open [**/infra/lib/config.ts**](infra/config/dev.toml) and replace values for your environment
+1. open [**/infra/config/dev.toml**](infra/config/dev.toml) and replace values for your environment
 
 2. copy `dev.toml` file under infra folder with name `.toml`
 
