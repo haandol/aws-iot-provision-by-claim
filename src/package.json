@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "aws-iot-device-sdk-v2": "^1.16.0",
+    "pino": "^8.16.0",
     "yargs": "^17.7.2"
   }
 }

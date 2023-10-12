@@ -1,7 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as pino from 'pino';
 import { mqtt, iot, mqtt5, auth, iotidentity } from 'aws-iot-device-sdk-v2';
 import { once } from 'events';
+import { toUtf8 } from '@aws-sdk/util-utf8-browser';
+const logger = pino.pino({ name: 'app' });
 const yargs = require('yargs');
 
 type Args = { [index: string]: any };
@@ -106,11 +109,11 @@ async function executeKeys(
         response?: iotidentity.model.CreateKeysAndCertificateResponse
       ) => {
         if (response) {
-          console.log('Got CreateKeysAndCertificateResponse');
+          logger.info('Got CreateKeysAndCertificateResponse');
         }
 
         if (error || !response) {
-          console.log('Error occurred..');
+          logger.error('Error occurred..');
           reject(error);
         } else {
           const { certificatePem, privateKey, certificateOwnershipToken } =
@@ -134,7 +137,7 @@ async function executeKeys(
         response?: iotidentity.model.ErrorResponse
       ) => {
         if (response) {
-          console.log(
+          logger.info(
             'CreateKeysAndCertificate ErrorResponse for ' +
               ' statusCode=:' +
               response.statusCode +
@@ -145,12 +148,12 @@ async function executeKeys(
           );
         }
         if (error) {
-          console.log('Error occurred..');
+          logger.error('Error occurred..');
         }
         reject(error);
       };
 
-      console.log(
+      logger.info(
         'Subscribing to CreateKeysAndCertificate Accepted and Rejected topics..'
       );
       const keysSubRequest: iotidentity.model.CreateKeysAndCertificateSubscriptionRequest =
@@ -166,7 +169,7 @@ async function executeKeys(
         keysRejected
       );
 
-      console.log('Publishing to CreateKeysAndCertificate topic..');
+      logger.info('Publishing to CreateKeysAndCertificate topic..');
       const keysRequest: iotidentity.model.CreateKeysAndCertificateRequest = {
         toJSON() {
           return {};
@@ -194,10 +197,10 @@ async function executeRegisterThing(
       response?: iotidentity.model.RegisterThingResponse
     ) => {
       if (response) {
-        console.log('Got RegisterThingResponse');
+        logger.info('Got RegisterThingResponse');
       }
       if (error) {
-        console.log('Error occurred..');
+        logger.error('Error occurred..');
       }
       resolve();
     };
@@ -206,7 +209,7 @@ async function executeRegisterThing(
       response?: iotidentity.model.ErrorResponse
     ) => {
       if (response) {
-        console.log(
+        logger.info(
           'RegisterThing ErrorResponse for ' +
             'statusCode=:' +
             response.statusCode +
@@ -217,12 +220,12 @@ async function executeRegisterThing(
         );
       }
       if (error) {
-        console.log('Error occurred..');
+        logger.error('Error occurred..');
       }
       reject(error);
     };
 
-    console.log('Subscribing to RegisterThing Accepted and Rejected topics..');
+    logger.info('Subscribing to RegisterThing Accepted and Rejected topics..');
     const registerThingSubRequest: iotidentity.model.RegisterThingSubscriptionRequest =
       { templateName };
 
@@ -237,12 +240,12 @@ async function executeRegisterThing(
       registerRejected
     );
 
-    console.log('Publishing to RegisterThing topic..');
+    logger.info('Publishing to RegisterThing topic..');
     const parameters = {
       SerialNumber: thingName,
       ModelType: 'Demo',
     };
-    console.log('token=' + token);
+    logger.info('token=' + token);
 
     const registerThing: iotidentity.model.RegisterThingRequest = {
       parameters,
@@ -254,7 +257,7 @@ async function executeRegisterThing(
 }
 
 async function main(argv: Args) {
-  console.log(`Connecting... ${JSON.stringify(argv)}`);
+  logger.info(`Connecting... ${JSON.stringify(argv)}`);
 
   const certPath = path.resolve(__dirname, '..', 'certs', 'device.pem');
   const keyPath = path.resolve(__dirname, '..', 'certs', 'device.key');
@@ -278,18 +281,28 @@ async function main(argv: Args) {
     );
   }
 
+  const messageHandler = (eventData: mqtt5.MessageReceivedEvent) => {
+    logger.info('Message Received event: ' + JSON.stringify(eventData.message));
+    if (eventData.message.payload) {
+      logger.info(
+        '  with payload: ' +
+          toUtf8(new Uint8Array(eventData.message.payload as ArrayBuffer))
+      );
+    }
+  };
+  client5.on('messageReceived', messageHandler);
+
   const connectionSuccess = once(client5, 'connectionSuccess');
   client5.start();
 
   // force node to wait 60 seconds before killing itself, promises do not keep node alive
-  const timer = setTimeout(() => {}, 60 * 1000);
   await connectionSuccess;
-  console.log('Connected with Mqtt5 Client!');
+  logger.info('Connected with Mqtt5 Client!');
 
   if (!isRegistered) {
     const identity = iotidentity.IotIdentityClient.newFromMqtt5Client(client5);
     const token = await executeKeys(identity);
-    console.log(`token: ${token}`);
+    logger.info(`token: ${token}`);
     await executeRegisterThing(
       identity,
       token as string,
@@ -298,25 +311,34 @@ async function main(argv: Args) {
     );
   }
 
-  let result = await client5.publish({
+  const topicName = 'hello/world';
+  const subAck = await client5.subscribe({
+    subscriptions: [{ qos: mqtt5.QoS.AtLeastOnce, topicFilter: topicName }],
+  });
+  logger.info('Suback result: ' + JSON.stringify(subAck));
+
+  const pubAck = await client5.publish({
     qos: mqtt5.QoS.AtLeastOnce,
-    topicName: 'hello/world',
+    topicName: topicName,
     payload: JSON.stringify('hello world'),
     userProperties: [{ name: 'publishedAt', value: `${new Date()}` }],
   });
-  console.log('Publish result: ' + JSON.stringify(result));
+  logger.info('Publish result: ' + JSON.stringify(pubAck));
 
-  console.log('Disconnecting...');
+  const unsubAck = await client5.unsubscribe({
+    topicFilters: [topicName],
+  });
+  logger.info('Unsuback result: ' + JSON.stringify(unsubAck));
+
+  logger.info('Disconnecting...');
   let stopped = once(client5, 'stopped');
   client5.stop();
   await stopped;
   client5.close();
-  console.log('Disconnected');
-
-  // Allow node to die if the promise above resolved
-  clearTimeout(timer);
-
-  process.exit(0);
+  logger.info('Disconnected');
 }
 
-main(argv).catch((e) => console.error(e));
+main(argv).catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
