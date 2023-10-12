@@ -20,6 +20,6 @@ REG_CODE=$(aws iot get-registration-code --profile $PROFILE --query registration
 SUBJ="/C=KR/CN=$REG_CODE"
 openssl req -new -key verification.key -out verification.csr -subj $SUBJ
 
-openssl x509 -req -in verification.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out verification.pem -days 500 -sha256
+openssl x509 -req -in verification.csr -CA Certificate.pem -CAkey Certificate.key -CAcreateserial -out verification.pem -days 500 -sha256
 
 popd

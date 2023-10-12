@@ -159,7 +159,7 @@ export class ProvisioningStack extends cdk.Stack {
     });
 
     const caCertificatePem = fs.readFileSync(
-      path.resolve(__dirname, '..', '..', '..', 'certs', 'rootCA.pem')
+      path.resolve(__dirname, '..', '..', '..', 'certs', 'Certificate.pem')
     );
     const certificate = new iot.CfnCertificate(
       this,
