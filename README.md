@@ -91,8 +91,8 @@ $ aws iot-data publish --topic iot/thing/$THING_NAME --payload hi
 
 # References
 
-https://aws.amazon.com/ko/blogs/iot/how-to-automate-onboarding-of-iot-devices-to-aws-iot-core-at-scale-with-fleet-provisioning/
-https://github.com/aws-samples/aws-iot-fleet-provisioning
+- https://aws.amazon.com/ko/blogs/iot/how-to-automate-onboarding-of-iot-devices-to-aws-iot-core-at-scale-with-fleet-provisioning/
+- https://github.com/aws-samples/aws-iot-fleet-provisioning
 
 # TroubleShooting
 
