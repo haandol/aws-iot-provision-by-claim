@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
@@ -153,27 +152,9 @@ export class ProvisioningStack extends cdk.Stack {
         },
       ],
     };
-    const provisioningPolicy = new iot.CfnPolicy(this, 'ProvisioningPolicy', {
+    new iot.CfnPolicy(this, 'ProvisioningPolicy', {
       policyDocument: provisionPolicyDocument,
       policyName: `${ns}provisioningPolicy`,
-    });
-
-    const caCertificatePem = fs.readFileSync(
-      path.resolve(__dirname, '..', '..', '..', 'certs', 'Certificate.pem')
-    );
-    const certificate = new iot.CfnCertificate(
-      this,
-      'ProvisioningCertificate',
-      {
-        status: 'ACTIVE',
-        caCertificatePem: caCertificatePem.toString(),
-        certificatePem: caCertificatePem.toString(),
-        certificateMode: 'DEFAULT',
-      }
-    );
-    new iot.CfnPolicyPrincipalAttachment(this, 'ProvisioningPolicyAttachment', {
-      policyName: provisioningPolicy.policyName!,
-      principal: certificate.attrArn,
     });
   }
 }

@@ -12,28 +12,8 @@ Image from [AWS Whitepaper](https://docs.aws.amazon.com/whitepapers/latest/devic
 
 # Installation
 
-1. Register RooCA
-2. Deploy Infra
-3. Connect device
-
-## Create RootCA
-
-```bash
-$ export PROFILE=default
-$ ./scripts/create-rootca.sh
-```
-
-### Create private key verification certificate
-
-```bash
-$ ./scripts/create-verification-crt.sh $PROFILE
-```
-
-### Register RootCA using verification certification
-
-```bash
-$ ./scripts/register-root-ca.sh $PROFILE
-```
+1. Deploy Infra
+2. Connect device
 
 ## Deploy infrastructure
 
